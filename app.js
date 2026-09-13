@@ -149,11 +149,21 @@ function renderProgress(meta, state) {
   $('meta').textContent = meta?.source ? `题库：${meta.source}（共 ${total} 题）` : `共 ${total} 题`;
 
   const pct = total === 0 ? 0 : Math.round((answered / total) * 100);
-  $('progressText').textContent = `进度：已答 ${answered}/${total}（正确 ${correct}，错误 ${wrong}）`;
+  $('progressText').innerHTML = `进度：已答 <b>${answered}/${total}</b>（正确 <span class="good-num">${correct}</span>，错误 <span class="bad-num">${wrong}</span>）`;
   $('progressFill').style.width = `${pct}%`;
 
   const wrongCount = buildWrongIds(state).length;
-  $('toggleModeBtn').textContent = state.mode === 'wrong' ? '返回练习' : `错题回顾（${wrongCount}）`;
+  const modeBtn = $('toggleModeBtn');
+  modeBtn.innerHTML = '';
+  const modeSpan = document.createElement('span');
+  modeSpan.textContent = state.mode === 'wrong' ? '返回练习' : '错题回顾';
+  modeBtn.appendChild(modeSpan);
+  if (state.mode !== 'wrong' && wrongCount > 0) {
+    const badge = document.createElement('span');
+    badge.className = 'badge';
+    badge.textContent = wrongCount;
+    modeBtn.appendChild(badge);
+  }
 
   const banner = $('modeBanner');
   if (state.mode === 'wrong') {
@@ -178,16 +188,34 @@ function showResult(q, saved) {
   const ok = saved.correct === true;
   resultEl.hidden = false;
   resultEl.className = 'result ' + (ok ? 'good' : 'bad');
+  resultEl.innerHTML = '';
 
+  const icon = document.createElement('div');
+  icon.className = 'res-icon';
+  icon.textContent = ok ? '✓' : '✕';
+
+  const body = document.createElement('div');
+  body.className = 'res-body';
+
+  const title = document.createElement('div');
+  title.className = 'res-title';
+  title.textContent = ok ? '回答正确' : '回答错误';
+
+  const detail = document.createElement('div');
+  detail.className = 'res-detail';
   const parts = [];
-  parts.push(ok ? '结果：回答正确' : '结果：回答错误');
   if (q.type === 'multiple') {
     parts.push(`正确答案：${sortLetters(q.answer) || '（未知）'}`);
   } else {
     parts.push(`正确答案：${normalizeText(q.answer) || '（未知）'}`);
   }
   if (q.explanation) parts.push(`答案解释：${q.explanation}`);
-  resultEl.textContent = parts.join('\n');
+  detail.textContent = parts.join('\n');
+
+  body.appendChild(title);
+  body.appendChild(detail);
+  resultEl.appendChild(icon);
+  resultEl.appendChild(body);
 }
 
 function lockInputs(locked) {
@@ -256,6 +284,9 @@ function renderQuestion(questionsById, state, bank) {
       input.name = name;
       input.value = label;
 
+      const mark = document.createElement('div');
+      mark.className = 'mark';
+
       const l = document.createElement('div');
       l.className = 'label';
       l.textContent = `${label}.`;
@@ -265,6 +296,7 @@ function renderQuestion(questionsById, state, bank) {
       t.textContent = q.options[label];
 
       option.appendChild(input);
+      option.appendChild(mark);
       option.appendChild(l);
       option.appendChild(t);
       optionsEl.appendChild(option);
@@ -297,6 +329,21 @@ function renderQuestion(questionsById, state, bank) {
     $('nextBtn').disabled = false;
     lockInputs(true);
     showResult(q, saved);
+
+    /* 选项对错标记：正确项绿色、错选红色、其余变暗 */
+    const correctLetters = String(q.answer || '').toUpperCase().replace(/[^A-H]/g, '').split('');
+    const chosen = Array.isArray(saved.response)
+      ? saved.response.map((x) => String(x).toUpperCase())
+      : [String(saved.response ?? '').toUpperCase()];
+    for (const opt of optionsEl.querySelectorAll('.option')) {
+      const val = opt.querySelector('input').value.toUpperCase();
+      opt.classList.add('locked');
+      if (correctLetters.includes(val)) {
+        opt.classList.add('correct');
+      } else if (chosen.includes(val)) {
+        opt.classList.add('wrong');
+      }
+    }
   } else {
     $('nextBtn').disabled = true;
     lockInputs(false);
@@ -637,6 +684,7 @@ async function main() {
       row.className = 'bank';
 
       const left = document.createElement('div');
+      left.className = 'bank-left';
 
       const name = document.createElement('div');
       name.className = 'bank-name';
@@ -644,7 +692,7 @@ async function main() {
 
       const meta = document.createElement('div');
       meta.className = 'bank-meta';
-      meta.textContent = `进度：${stats.answered}/${total}（正确 ${stats.correct}，错误 ${stats.wrong}）`;
+      meta.textContent = `已答 ${stats.answered}/${total} · 正确 ${stats.correct} · 错误 ${stats.wrong}`;
 
       const prog = document.createElement('div');
       prog.className = 'bank-progress';
@@ -653,7 +701,11 @@ async function main() {
       const fill = document.createElement('div');
       fill.style.width = `${pct}%`;
       bar.appendChild(fill);
+      const pctEl = document.createElement('div');
+      pctEl.className = 'bank-pct';
+      pctEl.textContent = `${pct}%`;
       prog.appendChild(bar);
+      prog.appendChild(pctEl);
 
       left.appendChild(name);
       left.appendChild(meta);
@@ -715,9 +767,10 @@ async function main() {
 
   const banks = banksIndex.banks || [];
 
-  function setTransferMsg(msg) {
+  function setTransferMsg(msg, isError) {
     if (!transferMsg) return;
     transferMsg.textContent = msg || '';
+    transferMsg.classList.toggle('err', !!isError);
   }
 
   const exportProgressBtn = $('exportProgressBtn');
@@ -742,7 +795,7 @@ async function main() {
       setTransferMsg('');
       const payload = parseImportPayload(importText.value);
       if (!payload) {
-        setTransferMsg('导入失败：文本格式不正确。');
+        setTransferMsg('导入失败：文本格式不正确。', true);
         return;
       }
       const { imported, skipped } = importProgressFromPayload(payload);
@@ -799,7 +852,7 @@ async function main() {
     submitCurrentAnswer();
   });
 
-  /* 单选/判断题：点击选项即提交；多选题需点“提交” */
+  /* 单选/判断题：点击选项即提交；多选题需点“确认答案” */
   document.addEventListener('change', (e) => {
     const target = e.target;
     if (!(target instanceof HTMLInputElement)) return;
@@ -809,6 +862,12 @@ async function main() {
     if (!qa) return;
     const { qid, q } = qa;
     if (state.answers?.[qid]) return;
+
+    /* 视觉选中态 */
+    for (const opt of document.querySelectorAll('#options .option')) {
+      const input = opt.querySelector('input');
+      opt.classList.toggle('selected', input.checked);
+    }
 
     if (q.type === 'multiple') {
       const submitBtn = $('submitBtn');

@@ -4,11 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="安全测试刷题器：实验室安全知识题库练习，支持错题回顾与跨设备进度同步" />
-    <meta name="theme-color" content="#2563eb" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>安全测试刷题器</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <div class="bg" aria-hidden="true"></div>
+
     <div class="container">
       <header class="header">
         <div class="title">
@@ -17,8 +21,8 @@
         </div>
 
         <div class="actions">
-          <button id="backHomeBtn" class="btn" type="button" hidden>返回题库</button>
-          <button id="toggleModeBtn" class="btn" type="button" hidden>错题回顾</button>
+          <button id="backHomeBtn" class="btn btn-ghost" type="button" hidden>← 返回</button>
+          <button id="toggleModeBtn" class="btn btn-ghost" type="button" hidden>错题回顾</button>
           <button id="resetBtn" class="btn btn-secondary" type="button" hidden>重置进度</button>
         </div>
       </header>
@@ -43,10 +47,10 @@
             </div>
 
             <label class="transfer-label" for="exportText">导出文本</label>
-            <textarea id="exportText" class="textarea" rows="4" readonly placeholder="点击“复制进度文本”生成"></textarea>
+            <textarea id="exportText" class="textarea" rows="3" readonly placeholder="点击“复制进度文本”生成"></textarea>
 
             <label class="transfer-label" for="importText">导入文本</label>
-            <textarea id="importText" class="textarea" rows="4" placeholder="把另一台设备复制的文本粘贴到这里"></textarea>
+            <textarea id="importText" class="textarea" rows="3" placeholder="把另一台设备复制的文本粘贴到这里"></textarea>
             <div class="transfer-actions">
               <button id="importProgressBtn" class="btn" type="button">导入进度</button>
             </div>
@@ -82,15 +86,15 @@
               </div>
 
               <div class="form-actions">
-                <button id="submitBtn" class="btn btn-primary" type="submit" hidden>提交</button>
-                <button id="nextBtn" class="btn" type="button" disabled>下一题</button>
+                <button id="submitBtn" class="btn btn-primary" type="submit" hidden>确认答案</button>
+                <button id="nextBtn" class="btn btn-primary" type="button" disabled>下一题 →</button>
               </div>
             </form>
 
             <div id="result" class="result" hidden></div>
 
             <div class="feedback">
-              <button id="feedbackBtn" class="btn btn-secondary" type="button">题目错误反馈</button>
+              <button id="feedbackBtn" class="btn btn-ghost" type="button">题目错误反馈</button>
             </div>
           </div>
 
