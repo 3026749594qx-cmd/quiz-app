@@ -40,8 +40,8 @@
   --radius-pill: 999px;
 
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.45);
-  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
-    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", Roboto, Arial, sans-serif;
+  /* 衬线字体体系（参考歌词页风格）：英文 Georgia / Times，中文宋体 */
+  --font: "Georgia", "Times New Roman", "Songti SC", "STSong", "SimSun", serif;
 }
 
 * {
@@ -109,9 +109,9 @@ body {
 }
 
 .title h1 {
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  font-size: 23px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   background: linear-gradient(180deg, #ffffff 30%, #9ec3f7 100%);
   -webkit-background-clip: text;
   background-clip: text;
