@@ -1,0 +1,11 @@
+{
+  "banks": [
+    {
+      "id": "safety-test",
+      "name": "安全测试-学习资料",
+      "count": 60,
+      "questionsPath": "banks/safety-test/questions.json",
+      "sourcePdfPath": "安全测试-学习资料.pdf"
+    }
+  ]
+}
