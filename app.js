@@ -1,4 +1,4 @@
-/* 安全测试刷题器 */
+/* Quiz Assistant · 通用交互式刷题器 */
 'use strict';
 
 const BANKS_INDEX_URL = './banks/index.json';

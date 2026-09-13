@@ -1,6 +1,8 @@
 /* ============================================================
-   安全测试刷题器 · 深色主题
+   Quiz Assistant · 通用交互式刷题器 · 深色主题
    设计参考：iOS 深色模式规范 + 深蓝渐变背景质感
+   字体：正文一律正常宋体（学习内容可读性优先），
+        仅标题等设计元素使用衬线展示字体
    ============================================================ */
 
 :root {
@@ -40,8 +42,11 @@
   --radius-pill: 999px;
 
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.45);
-  /* 衬线字体体系（参考歌词页风格）：英文 Georgia / Times，中文宋体 */
-  --font: "Georgia", "Times New Roman", "Songti SC", "STSong", "SimSun", serif;
+
+  /* 正文字体：正常宋体（题目、选项、进度等学习内容一律用宋体，不用花体） */
+  --font-body: "Songti SC", "STSong", "SimSun", serif;
+  /* 展示字体：设计感衬线，仅用于标题等题目之外的设计元素 */
+  --font-display: "Georgia", "Times New Roman", "Songti SC", "STSong", "SimSun", serif;
 }
 
 * {
@@ -60,7 +65,7 @@ html {
 }
 
 body {
-  font-family: var(--font);
+  font-family: var(--font-body);
   color: var(--text);
   line-height: 1.6;
   min-height: 100vh;
@@ -109,9 +114,10 @@ body {
 }
 
 .title h1 {
-  font-size: 23px;
+  font-family: var(--font-display);
+  font-size: 24px;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   background: linear-gradient(180deg, #ffffff 30%, #9ec3f7 100%);
   -webkit-background-clip: text;
   background-clip: text;
