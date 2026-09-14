@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Quiz Assistant</title>
-    <link rel="stylesheet" href="styles.css?v=20260913d" />
+    <link rel="stylesheet" href="styles.css?v=20260913e" />
   </head>
   <body>
     <div class="bg" aria-hidden="true"></div>
@@ -61,7 +61,10 @@
         <!-- 刷题页 -->
         <section id="quizView" hidden>
           <section class="stats" aria-label="进度">
-            <div id="progressText" class="progress-text">加载中…</div>
+            <div class="stats-row">
+              <div id="progressText" class="progress-text">加载中…</div>
+              <button id="prevBtn" class="btn btn-ghost btn-sm" type="button" disabled>← 上一题</button>
+            </div>
             <div class="progress-bar">
               <div id="progressFill" class="progress-fill" style="width: 0%"></div>
             </div>
@@ -72,10 +75,7 @@
           <div id="questionArea" hidden>
             <div class="qhead">
               <div id="qIndex" class="qindex"></div>
-              <div class="qhead-right">
-                <button id="prevBtn" class="btn btn-ghost btn-sm" type="button" disabled>← 上一题</button>
-                <div id="qType" class="qtype"></div>
-              </div>
+              <div id="qType" class="qtype"></div>
             </div>
 
             <div id="qStem" class="stem"></div>

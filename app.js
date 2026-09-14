@@ -181,6 +181,7 @@ function renderEmpty(message) {
   empty.hidden = false;
   empty.textContent = message;
   $('feedbackBtn').hidden = true;
+  $('prevBtn').hidden = true;
 }
 
 function showResult(q, saved) {
@@ -246,7 +247,8 @@ function renderQuestion(questionsById, state, bank) {
   $('emptyState').hidden = true;
   $('questionArea').hidden = false;
 
-  /* 上一题按钮：第一题（或错题模式第一道错题）时禁用 */
+  /* 上一题按钮：显示于进度行右侧；第一题（或错题模式第一道错题）时禁用 */
+  $('prevBtn').hidden = false;
   $('prevBtn').disabled = getActiveIndex(state) === 0;
 
   $('qIndex').textContent =

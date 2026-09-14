@@ -425,13 +425,22 @@ body {
   margin-bottom: 16px;
 }
 
+.stats-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 7px;
+}
+
 .progress-text {
   font-size: 13px;
   color: var(--text-secondary);
-  margin-bottom: 7px;
   display: flex;
   align-items: baseline;
   gap: 6px;
+  flex: 1;
+  min-width: 0;
 }
 
 .progress-text b {
@@ -488,27 +497,21 @@ body {
   margin-bottom: 12px;
 }
 
-.qhead-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-/* 小号按钮（qhead 右上角用） */
+/* 小号按钮（进度行右侧用） */
 .btn-sm {
   padding: 5px 10px;
   min-height: 30px;
   font-size: 12.5px;
   border-radius: var(--radius-pill);
+  flex-shrink: 0;
 }
 
-.qhead-right .btn-sm:disabled {
+.btn-sm:disabled {
   opacity: 0.35;
   cursor: not-allowed;
 }
 
-.qhead-right .btn-sm:disabled:hover {
+.btn-sm:disabled:hover {
   background: transparent;
 }
 
