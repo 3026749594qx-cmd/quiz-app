@@ -497,6 +497,45 @@ body {
   margin-bottom: 12px;
 }
 
+.qhead-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* 红色小垃圾桶：错题回顾模式下标为已会并移出错题集 */
+.forgive-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease, transform 0.08s ease;
+}
+
+.forgive-btn:hover {
+  background: var(--danger-soft);
+}
+
+.forgive-btn:active {
+  transform: scale(0.92);
+}
+
+.forgive-btn svg {
+  width: 17px;
+  height: 17px;
+  display: block;
+  fill: var(--danger);
+}
+
 /* 小号按钮（进度行右侧用） */
 .btn-sm {
   padding: 5px 10px;
