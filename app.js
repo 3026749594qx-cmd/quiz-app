@@ -246,6 +246,9 @@ function renderQuestion(questionsById, state, bank) {
   $('emptyState').hidden = true;
   $('questionArea').hidden = false;
 
+  /* 上一题按钮：第一题（或错题模式第一道错题）时禁用 */
+  $('prevBtn').disabled = getActiveIndex(state) === 0;
+
   $('qIndex').textContent =
     state.mode === 'wrong'
       ? `错题 ${getActiveIndex(state) + 1}/${activeIds.length}`
@@ -911,6 +914,16 @@ async function main() {
     } else {
       renderEmpty(`本轮练习已完成（共 ${state.questionIds.length} 题）。全部正确，做得不错。`);
     }
+  });
+
+  /* 上一题：可一直返回到第一题 */
+  $('prevBtn').addEventListener('click', () => {
+    const idx = getActiveIndex(state);
+    if (idx <= 0) return;
+    setActiveIndex(state, idx - 1);
+    saveState(currentBank.id, state);
+    rerenderQuiz();
+    scrollToTop();
   });
 
   toggleModeBtn.addEventListener('click', () => {
