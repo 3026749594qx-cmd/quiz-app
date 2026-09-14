@@ -251,6 +251,9 @@ function renderQuestion(questionsById, state, bank) {
   $('prevBtn').hidden = false;
   $('prevBtn').disabled = getActiveIndex(state) === 0;
 
+  /* 红色垃圾桶：仅错题回顾模式显示（标为已会，移出错题集） */
+  $('forgiveBtn').hidden = state.mode !== 'wrong';
+
   $('qIndex').textContent =
     state.mode === 'wrong'
       ? `错题 ${getActiveIndex(state) + 1}/${activeIds.length}`
@@ -924,6 +927,25 @@ async function main() {
     if (idx <= 0) return;
     setActiveIndex(state, idx - 1);
     saveState(currentBank.id, state);
+    rerenderQuiz();
+    scrollToTop();
+  });
+
+  /* 标为已会：从错题集移除当前题（仅错题回顾模式显示） */
+  $('forgiveBtn').addEventListener('click', () => {
+    if (state.mode !== 'wrong') return;
+    const qa = getCurrentQA();
+    if (!qa) return;
+    const { qid } = qa;
+
+    delete state.answers[qid];
+    saveState(currentBank.id, state);
+
+    /* 修正游标：删除后错题列表变短，若越界则回退到末位 */
+    const wrongIds = buildWrongIds(state);
+    let idx = getActiveIndex(state);
+    if (idx >= wrongIds.length) idx = Math.max(0, wrongIds.length - 1);
+    setActiveIndex(state, idx);
     rerenderQuiz();
     scrollToTop();
   });
