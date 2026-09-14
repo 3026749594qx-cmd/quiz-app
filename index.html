@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Quiz Assistant</title>
-    <link rel="stylesheet" href="styles.css?v=20260913e" />
+    <link rel="stylesheet" href="styles.css?v=20260913f" />
   </head>
   <body>
     <div class="bg" aria-hidden="true"></div>
@@ -75,7 +75,14 @@
           <div id="questionArea" hidden>
             <div class="qhead">
               <div id="qIndex" class="qindex"></div>
-              <div id="qType" class="qtype"></div>
+              <div class="qhead-right">
+                <button id="forgiveBtn" class="forgive-btn" type="button" hidden aria-label="将此题标为已会，移出错题集" title="标为已会，移出错题集">
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M9 3h6l1 2h4v2H4V5h4l1-2zM6 8h12l-1.1 12.2a2 2 0 0 1-2 1.8H9.1a2 2 0 0 1-2-1.8L6 8zm4 3.5v8h1.6v-8H10zm2.2 0v8h1.6v-8h-1.6zm2.2 0v8H16v-8h-1.6z" />
+                  </svg>
+                </button>
+                <div id="qType" class="qtype"></div>
+              </div>
             </div>
 
             <div id="qStem" class="stem"></div>
