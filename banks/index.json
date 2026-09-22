@@ -1,17 +1,17 @@
 {
-    "banks":  [
-                  {
-                      "id":  "safety-test",
-                      "name":  "安全测试-学习资料",
-                      "count":  60,
-                      "questionsPath":  "banks/safety-test/questions.json",
-                      "sourcePdfPath":  "安全测试-学习资料.pdf"
-                  },
-                  {
-                      "id":  "engineering-safety",
-                      "name":  "工程训练安全测试",
-                      "count":  59,
-                      "questionsPath":  "banks/engineering-safety/questions.json"
-                  }
-              ]
+  "banks": [
+    {
+      "id": "safety-test",
+      "name": "大学物理实验安全测试",
+      "count": 60,
+      "questionsPath": "banks/safety-test/questions.json",
+      "sourcePdfPath": "安全测试-学习资料.pdf"
+    },
+    {
+      "id": "engineering-safety",
+      "name": "工程训练安全测试",
+      "count": 59,
+      "questionsPath": "banks/engineering-safety/questions.json"
+    }
+  ]
 }
