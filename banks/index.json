@@ -12,6 +12,12 @@
       "name": "工程训练安全测试",
       "count": 59,
       "questionsPath": "banks/engineering-safety/questions.json"
+    },
+    {
+      "id": "mechatronics-preview",
+      "name": "机电预习作业",
+      "count": 10,
+      "questionsPath": "banks/mechatronics-preview/questions.json"
     }
   ]
 }
