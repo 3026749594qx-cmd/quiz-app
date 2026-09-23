@@ -940,11 +940,16 @@ async function main() {
       openQrModal('扫码同步进度');
       qrModalBody.innerHTML =
         '<div class="qr-hint">用另一台设备的相机扫这个码，会自动打开本网页并同步进度。</div>' +
-        '<canvas id="qrCanvas" class="qr-canvas"></canvas>' +
+        '<div id="qrCanvas" class="qr-canvas"></div>' +
         '<div class="qr-url">' + url.replace(/&/g,'&amp;') + '</div>';
       try {
-        await QRCode.toCanvas(document.getElementById('qrCanvas'), url, {
-          width: 260, margin: 2, color: { dark: '#e8e6e3', light: '#1c1c1e' }
+        new QRCode(document.getElementById('qrCanvas'), {
+          text: url,
+          width: 260,
+          height: 260,
+          colorDark: '#e8e6e3',
+          colorLight: '#1c1c1e',
+          correctLevel: QRCode.CorrectLevel.M
         });
       } catch (e) {
         qrModalBody.insertAdjacentHTML('afterbegin', '<div class="qr-hint" style="color:#ff6b6b">二维码生成失败：' + e.message + '</div>');
