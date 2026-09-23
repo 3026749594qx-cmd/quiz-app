@@ -38,22 +38,38 @@
 
           <section class="transfer" aria-label="进度迁移">
             <div class="transfer-title">进度迁移（跨设备）</div>
-            <div class="transfer-sub">在电脑上点“复制进度文本”，在手机上粘贴到导入框点“导入进度”即可同步，反之亦然。</div>
+            <div class="transfer-sub">点“导出二维码”用另一台设备的相机扫码即可同步，无需微信转发。</div>
 
             <div class="transfer-actions">
-              <button id="exportProgressBtn" class="btn btn-primary" type="button">复制进度文本</button>
+              <button id="exportQrBtn" class="btn btn-primary" type="button">导出二维码</button>
+              <button id="scanQrBtn" class="btn" type="button">扫码导入</button>
+            </div>
+            <div class="transfer-actions" style="margin-top:8px">
+              <button id="exportProgressBtn" class="btn btn-ghost btn-sm" type="button">复制进度文本</button>
               <span id="transferMsg" class="transfer-msg" role="status" aria-live="polite"></span>
             </div>
 
-            <label class="transfer-label" for="exportText">导出文本</label>
-            <textarea id="exportText" class="textarea" rows="3" readonly placeholder="点击“复制进度文本”生成"></textarea>
-
-            <label class="transfer-label" for="importText">导入文本</label>
-            <textarea id="importText" class="textarea" rows="3" placeholder="把另一台设备复制的文本粘贴到这里"></textarea>
-            <div class="transfer-actions">
-              <button id="importProgressBtn" class="btn" type="button">导入进度</button>
-            </div>
+            <details class="transfer-advanced">
+              <summary>高级：文本同步</summary>
+              <label class="transfer-label" for="exportText">导出文本</label>
+              <textarea id="exportText" class="textarea" rows="3" readonly placeholder="点击“复制进度文本”生成"></textarea>
+              <label class="transfer-label" for="importText">导入文本</label>
+              <textarea id="importText" class="textarea" rows="3" placeholder="把另一台设备复制的文本粘贴到这里"></textarea>
+              <div class="transfer-actions">
+                <button id="importProgressBtn" class="btn" type="button">导入进度</button>
+              </div>
+            </details>
           </section>
+
+          <!-- 二维码 Modal -->
+          <div id="qrModal" class="qr-modal" hidden>
+            <div class="qr-modal-backdrop" data-close-modal></div>
+            <div class="qr-modal-card" role="dialog" aria-modal="true" aria-label="进度同步">
+              <button class="qr-modal-close" type="button" data-close-modal aria-label="关闭">×</button>
+              <div id="qrModalTitle" class="qr-modal-title"></div>
+              <div id="qrModalBody" class="qr-modal-body"></div>
+            </div>
+          </div>
 
           <div id="homeEmpty" class="empty" hidden></div>
         </section>
@@ -116,6 +132,8 @@
       </footer>
     </div>
 
-    <script src="app.js?v=20260922" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/dist/html5-qrcode.min.js"></script>
+    <script src="app.js?v=20260923qr2" defer></script>
   </body>
 </html>
