@@ -942,3 +942,60 @@ body {
     min-height: 46px;
   }
 }
+
+/* ----- 二维码同步 Modal ----- */
+.qr-modal {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.qr-modal[hidden] { display: none; }
+.qr-modal-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.qr-modal-card {
+  position: relative;
+  background: #1c1c1e;
+  border: 1px solid #38383a;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 360px; width: 100%;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.qr-modal-close {
+  position: absolute; top: 10px; right: 14px;
+  background: none; border: none; color: #98989d;
+  font-size: 28px; line-height: 1; cursor: pointer;
+  padding: 4px 8px;
+}
+.qr-modal-close:hover { color: #fff; }
+.qr-modal-title {
+  font-family: Georgia, 'Songti SC', serif;
+  font-size: 18px; color: #f2f2f7;
+  margin-bottom: 16px; text-align: center;
+}
+.qr-modal-body { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.qr-hint {
+  font-size: 13px; color: #98989d; text-align: center; line-height: 1.5;
+}
+.qr-canvas {
+  background: #1c1c1e; border-radius: 8px;
+  display: block;
+}
+.qr-url {
+  font-size: 10px; color: #636366; word-break: break-all;
+  text-align: center; max-width: 100%;
+  font-family: ui-monospace, monospace;
+}
+.qr-reader { width: 100%; max-width: 280px; }
+.qr-reader video { border-radius: 8px; }
+.transfer-advanced {
+  margin-top: 12px; font-size: 12px; color: #636366;
+}
+.transfer-advanced summary { cursor: pointer; user-select: none; padding: 4px 0; }
+.transfer-advanced summary:hover { color: #98989d; }
+.transfer-advanced[open] { margin-bottom: 8px; }
