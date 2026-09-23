@@ -561,6 +561,94 @@ function importProgressFromPayload(payload) {
   return { imported, skipped };
 }
 
+/* ---------- 二维码同步（紧凑编码，适合 URL/二维码） ---------- */
+
+function toB64Url(obj) {
+  const json = JSON.stringify(obj);
+  const bytes = new TextEncoder().encode(json);
+  let bin = '';
+  bytes.forEach((b) => (bin += String.fromCharCode(b)));
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function fromB64Url(str) {
+  str = String(str || '').replace(/-/g, '+').replace(/_/g, '/');
+  while (str.length % 4) str += '=';
+  const bin = atob(str);
+  const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+
+function encodeCompactProgress() {
+  const statesByBankId = getAllSavedBankStates();
+  const banks = {};
+  for (const [bankId, st] of Object.entries(statesByBankId)) {
+    if (!isValidState(st) || !Array.isArray(st.questionIds)) continue;
+    let s = '';
+    for (const qid of st.questionIds) {
+      const rec = st.answers?.[qid];
+      if (!rec) s += '.';
+      else if (rec.correct) s += 'c';
+      else s += 'w';
+    }
+    banks[bankId] = s;
+  }
+  return { v: 2, ts: Date.now(), b: banks };
+}
+
+const PENDING_PREFIX = 'quizPendingImport_v2:';
+
+function mergeCompactIntoAnswers(answers, questionIds, str) {
+  const out = { ...(answers || {}) };
+  questionIds.forEach((qid, i) => {
+    const ch = str[i];
+    if (ch !== 'c' && ch !== 'w') return;
+    const prev = out[qid];
+    const prevWrong = prev && prev.correct === false;
+    const incomingWrong = ch === 'w';
+    if (prevWrong || incomingWrong) {
+      out[qid] = { response: prev?.response || '', correct: false, ts: Date.now() };
+    } else if (!prev) {
+      out[qid] = { response: '', correct: true, ts: Date.now() };
+    }
+  });
+  return out;
+}
+
+function applyCompactProgress(obj) {
+  if (!obj || obj.v !== 2 || !obj.b || typeof obj.b !== 'object') return { imported: 0, skipped: 0 };
+  let imported = 0;
+  let skipped = 0;
+  for (const [bankId, str] of Object.entries(obj.b)) {
+    if (typeof str !== 'string') { skipped++; continue; }
+    // 不管有没有 existing state，都存一份 pending import，等 enterBank 加载题目后按位置合并
+    try { localStorage.setItem(PENDING_PREFIX + bankId, str); } catch {}
+    const existing = loadState(bankId);
+    if (isValidState(existing) && Array.isArray(existing.questionIds)) {
+      const merged = mergeCompactIntoAnswers(existing.answers, existing.questionIds, str);
+      saveState(bankId, { ...existing, answers: merged });
+    }
+    imported++;
+  }
+  return { imported, skipped };
+}
+
+function consumePendingImport(bankId, questionIds) {
+  let str = null;
+  try { str = localStorage.getItem(PENDING_PREFIX + bankId); } catch {}
+  if (!str) return null;
+  try { localStorage.removeItem(PENDING_PREFIX + bankId); } catch {}
+  if (!Array.isArray(questionIds) || !questionIds.length) return null;
+  return mergeCompactIntoAnswers({}, questionIds, str);
+}
+
+function buildSyncUrl() {
+  const compact = encodeCompactProgress();
+  const b64 = toB64Url(compact);
+  const base = location.origin + location.pathname;
+  return `${base}#sync=${b64}`;
+}
+
 /* ---------- 题目反馈 ---------- */
 
 function formatOptionsForIssue(options) {
@@ -652,7 +740,20 @@ async function main() {
     if (!state || state.version !== 1 || !Array.isArray(state.questionIds)) {
       state = makeInitialState(questionIds);
       saveState(bankId, state);
-      return state;
+    }
+    // 合并扫码导入的 pending 进度（新设备首次进入某题库时生效）
+    const pendingAnswers = consumePendingImport(bankId, questionIds);
+    if (pendingAnswers) {
+      const mergedAnswers = { ...(state.answers || {}) };
+      for (const [qid, rec] of Object.entries(pendingAnswers)) {
+        const prev = mergedAnswers[qid];
+        const prevWrong = prev && prev.correct === false;
+        const inWrong = rec.correct === false;
+        if (prevWrong || inWrong) mergedAnswers[qid] = { response: prev?.response || '', correct: false, ts: Date.now() };
+        else if (!prev) mergedAnswers[qid] = rec;
+      }
+      state = { ...state, answers: mergedAnswers };
+      saveState(bankId, state);
     }
 
     const prev = new Set(state.questionIds);
@@ -811,6 +912,113 @@ async function main() {
       setTransferMsg(`已导入 ${imported} 个题库进度（跳过 ${skipped} 个）。`);
     });
   }
+
+  /* ----- 二维码同步 ----- */
+  const qrModal = $('qrModal');
+  const qrModalTitle = $('qrModalTitle');
+  const qrModalBody = $('qrModalBody');
+  let html5QrScanner = null;
+
+  function openQrModal(title) {
+    qrModalTitle.textContent = title || '';
+    qrModalBody.innerHTML = '';
+    qrModal.hidden = false;
+  }
+  function closeQrModal() {
+    qrModal.hidden = true;
+    qrModalBody.innerHTML = '';
+    if (html5QrScanner) { try { html5QrScanner.stop().catch(()=>{}); } catch {} html5QrScanner = null; }
+  }
+  qrModal.querySelectorAll('[data-close-modal]').forEach((el) => {
+    el.addEventListener('click', closeQrModal);
+  });
+
+  const exportQrBtn = $('exportQrBtn');
+  if (exportQrBtn) {
+    exportQrBtn.addEventListener('click', async () => {
+      const url = buildSyncUrl();
+      openQrModal('扫码同步进度');
+      qrModalBody.innerHTML =
+        '<div class="qr-hint">用另一台设备的相机扫这个码，会自动打开本网页并同步进度。</div>' +
+        '<canvas id="qrCanvas" class="qr-canvas"></canvas>' +
+        '<div class="qr-url">' + url.replace(/&/g,'&amp;') + '</div>';
+      try {
+        await QRCode.toCanvas(document.getElementById('qrCanvas'), url, {
+          width: 260, margin: 2, color: { dark: '#e8e6e3', light: '#1c1c1e' }
+        });
+      } catch (e) {
+        qrModalBody.insertAdjacentHTML('afterbegin', '<div class="qr-hint" style="color:#ff6b6b">二维码生成失败：' + e.message + '</div>');
+      }
+    });
+  }
+
+  const scanQrBtn = $('scanQrBtn');
+  if (scanQrBtn) {
+    scanQrBtn.addEventListener('click', () => {
+      openQrModal('扫描设备上的二维码');
+      qrModalBody.innerHTML =
+        '<div class="qr-hint">请将另一台设备屏幕上的二维码对准摄像头。</div>' +
+        '<div id="qrReader" class="qr-reader"></div>';
+      try {
+        html5QrScanner = new Html5Qrcode('qrReader');
+        html5QrScanner.start(
+          { facingMode: 'environment' },
+          { fps: 10, qrbox: { width: 220, height: 220 } },
+          (decodedText) => {
+            // 成功识别
+            try {
+              const u = new URL(decodedText);
+              const sync = u.hash.match(/sync=([^&]+)/);
+              if (sync) {
+                const obj = fromB64Url(sync[1]);
+                const r = applyCompactProgress(obj);
+                renderHomeList(banks);
+                closeQrModal();
+                setTransferMsg(`已从二维码导入 ${r.imported} 个题库进度。`);
+                return;
+              }
+            } catch {}
+            // 不是 sync URL，尝试当紧凑 base64
+            try {
+              const obj = fromB64Url(decodedText);
+              const r = applyCompactProgress(obj);
+              if (r.imported > 0) {
+                renderHomeList(banks);
+                closeQrModal();
+                setTransferMsg(`已从二维码导入 ${r.imported} 个题库进度。`);
+              }
+            } catch {}
+          },
+          () => { /* 每帧失败忽略 */ }
+        ).catch((e) => {
+          qrModalBody.insertAdjacentHTML('afterbegin', '<div class="qr-hint" style="color:#ff6b6b">摄像头启动失败：' + e.message + '<br>请确认已授权摄像头权限。</div>');
+        });
+      } catch (e) {
+        qrModalBody.insertAdjacentHTML('afterbegin', '<div class="qr-hint" style="color:#ff6b6b">扫码库初始化失败：' + e.message + '</div>');
+      }
+    });
+  }
+
+  /* 启动时检测 URL hash 里的 sync 参数（扫码后自动导入） */
+  (function applySyncFromHash() {
+    const raw = (location.hash || '').replace(/^#/, '');
+    const params = new URLSearchParams(raw);
+    const sync = params.get('sync');
+    if (!sync) return;
+    try {
+      const obj = fromB64Url(sync);
+      const r = applyCompactProgress(obj);
+      // 清掉 sync 参数，保留其他参数（如 bank）
+      params.delete('sync');
+      const rest = params.toString();
+      history.replaceState(null, '', location.pathname + (rest ? '#' + rest : ''));
+      if (r.imported > 0) {
+        setTransferMsg(`已从扫码链接导入 ${r.imported} 个题库进度。`);
+      }
+    } catch (e) {
+      console.warn('sync hash 解析失败', e);
+    }
+  })();
 
   /* 刷题运行时状态 */
   let currentBank = null;
