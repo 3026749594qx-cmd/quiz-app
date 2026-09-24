@@ -18,6 +18,12 @@
       "name": "机电预习作业",
       "count": 10,
       "questionsPath": "banks/mechatronics-preview/questions.json"
+    },
+    {
+      "id": "three-d-preview",
+      "name": "3D预习作业",
+      "count": 10,
+      "questionsPath": "banks/three-d-preview/questions.json"
     }
   ]
 }
